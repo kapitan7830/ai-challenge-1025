@@ -1,62 +1,74 @@
-# 🌡️ Temperature Demo Bot
+# 🤖 AI Models Comparison Bot
 
-Telegram бот для наглядной демонстрации разницы между температурами в OpenAI API.
+Telegram bot for comparing responses from different AI models: small open-source models vs commercial models.
 
-## Что такое температура?
+## What does it do?
 
-Параметр `temperature` контролирует случайность и креативность ответов AI:
+This bot sends your question to three different AI models and shows their responses side-by-side:
 
-- **0** - Детерминированные, предсказуемые ответы (всегда одинаковые)
-- **0.7** - Сбалансированный режим (по умолчанию в OpenAI)
-- **1.2** - Креативные, разнообразные ответы (больше случайности)
+- **🐭 SmolLM3-3B** - Small open-source model (3B parameters) from HuggingFace
+- **🔀 Arch-Router-1.5B** - Routing model (1.5B parameters) from HuggingFace
+- **🇷🇺 YandexGPT 5 Lite** - Lightweight commercial model from Yandex Cloud
 
-## Как работает бот?
+## Why compare models?
 
-1. Вы задаете любой вопрос в чат
-2. AI отвечает на него **3 раза** с температурами 0, 0.7 и 1.2
-3. Все ответы публикуются последовательно - вы видите разницу сразу!
+See the difference between:
+- **Quality**: How well each model understands and answers questions
+- **Speed**: Response time from each model
+- **Cost**: Token usage and pricing (free vs paid)
 
 ## Setup
 
-1. Установите зависимости:
+1. Install dependencies:
 ```bash
 npm install
 ```
 
-2. Создайте `.env` файл:
+2. Create `.env` file:
 ```bash
 TELEGRAM_BOT_TOKEN=your_telegram_bot_token
-OPENAI_API_KEY=your_openai_api_key
+HUGGINGFACE_API_KEY=your_huggingface_api_key
+YANDEX_API_KEY=your_yandex_api_key
+YANDEX_FOLDER_ID=your_yandex_folder_id
 ```
 
-3. API ключи:
-   - `TELEGRAM_BOT_TOKEN`: Получить у [@BotFather](https://t.me/botfather)
-   - `OPENAI_API_KEY`: Получить на [OpenAI Platform](https://platform.openai.com/api-keys)
+3. Get API keys:
+   - **TELEGRAM_BOT_TOKEN**: Get from [@BotFather](https://t.me/botfather)
+   - **HUGGINGFACE_API_KEY**: Get from [HuggingFace Settings](https://huggingface.co/settings/tokens)
+   - **YANDEX_API_KEY**: Create service account in [Yandex Cloud Console](https://console.yandex.cloud/folders?section=service-accounts)
+   - **YANDEX_FOLDER_ID**: Find in Yandex Cloud Console (in the URL or folder page)
 
-## Запуск
+## Running
 
 ```bash
 npm start
 ```
 
-Для разработки с автоперезагрузкой:
+For development with auto-reload:
 ```bash
 npm run dev
 ```
 
-## Использование
+## Usage
 
-1. Запустите бота командой `/start`
-2. Задайте любой вопрос (например: "Придумай короткую историю про кота", "Что такое квантовая физика?", "Напиши стихотворение про осень")
-3. Наблюдайте три разных ответа с температурами 0, 0.7 и 1.2
-4. Сравните: температура 0 даст структурированный ответ, 1.2 - креативный и непредсказуемый
+1. Start the bot with `/start` command
+2. Ask any question (e.g., "What is quantum physics?", "Explain machine learning", "Write a poem about AI")
+3. Receive three responses from different models
+4. Compare quality, speed, and cost
 
-## Команды
+Each response shows:
+- ⏱️ **Response time** in seconds
+- 📊 **Token count** (input + output)
+- 💰 **Cost** (free for HuggingFace models, ~₽0.04/1K tokens for Yandex)
 
-- `/start` - Приветственное сообщение и инструкции
-- `/help` - Показать справку
+## Commands
 
-## Модель
+- `/start` - Welcome message and instructions
+- `/help` - Show help
 
-Используется `gpt-4o-mini` - быстрая и недорогая модель, отлично показывающая разницу в температурах.
+## Models
+
+- **SmolLM3-3B** - Free open-source model via HuggingFace Inference Router
+- **Arch-Router-1.5B** - Free routing model via HuggingFace Inference Router
+- **YandexGPT 5 Lite** - Paid commercial model from Yandex Cloud
 
