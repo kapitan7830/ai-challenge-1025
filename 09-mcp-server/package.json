@@ -1,0 +1,31 @@
+{
+  "name": "telegram-openai-bot",
+  "version": "1.0.0",
+  "description": "Telegram bot with MCP server for character analysis",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "mcp-server": "node mcp/server.js",
+    "mcp-client": "node mcp/client.js",
+    "mcp-demo": "node mcp/test-simple.js",
+    "help": "node mcp/test-simple.js"
+  },
+  "keywords": [
+    "telegram",
+    "bot",
+    "openai",
+    "chatgpt",
+    "mcp"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "dotenv": "^16.4.5",
+    "openai": "^4.58.1",
+    "telegraf": "^4.16.3",
+    "zod": "^3.23.8"
+  }
+}
