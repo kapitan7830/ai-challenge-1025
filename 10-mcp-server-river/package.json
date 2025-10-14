@@ -1,0 +1,27 @@
+{
+  "name": "river-level-telegram-bot",
+  "version": "1.0.0",
+  "description": "Telegram bot with MCP server for river water level monitoring",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "mcp-server": "node mcp/server.js"
+  },
+  "keywords": [
+    "telegram",
+    "bot",
+    "river",
+    "water-level",
+    "mcp",
+    "yandexgpt"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "dotenv": "^16.4.5",
+    "telegraf": "^4.16.3"
+  }
+}
