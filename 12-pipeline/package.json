@@ -1,0 +1,23 @@
+{
+  "name": "habr-scraper-pipeline",
+  "version": "1.0.0",
+  "description": "Pipeline for scraping articles from Habr",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "server": "node src/mcp-server.js",
+    "flow": "node src/mcp-client.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "@octokit/rest": "^21.0.2",
+    "axios": "^1.7.7",
+    "better-sqlite3": "^11.7.0",
+    "cheerio": "^1.0.0",
+    "dotenv": "^16.4.5",
+    "openai": "^4.67.3"
+  }
+}
+
