@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: habr-scraper-postgres
+    environment:
+      POSTGRES_DB: habr_scraper
+      POSTGRES_USER: habr_user
+      POSTGRES_PASSWORD: habr_password
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U habr_user -d habr_scraper"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
