@@ -1,0 +1,17 @@
+{
+  "name": "github-structure-analyzer",
+  "version": "1.0.0",
+  "description": "Analyze GitHub repository structure using AI",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@octokit/rest": "^21.0.2",
+    "dotenv": "^16.4.5",
+    "openai": "^4.67.3"
+  }
+}
