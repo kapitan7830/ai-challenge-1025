@@ -1,0 +1,26 @@
+{
+  "name": "character-analyzer-bot",
+  "version": "3.1.0",
+  "description": "Telegram bot for character analysis with OpenAI and SQLite persistence",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "keywords": [
+    "telegram",
+    "bot",
+    "openai",
+    "character-analysis",
+    "text-summarization"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "better-sqlite3": "^12.4.1",
+    "dotenv": "^16.4.5",
+    "openai": "^4.58.1",
+    "telegraf": "^4.16.3"
+  }
+}
