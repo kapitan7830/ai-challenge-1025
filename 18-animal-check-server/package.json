@@ -1,0 +1,26 @@
+{
+  "name": "animal-analyzer",
+  "version": "1.0.0",
+  "description": "Анализатор упоминаний животных в веб-страницах",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "bot": "node bot.js"
+  },
+  "keywords": [
+    "openai",
+    "animals",
+    "analyzer"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "jsdom": "^25.0.1",
+    "node-telegram-bot-api": "^0.66.0",
+    "openai": "^4.58.1",
+    "pino": "^9.5.0"
+  }
+}
