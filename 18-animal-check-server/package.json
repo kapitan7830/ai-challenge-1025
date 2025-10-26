@@ -19,8 +19,8 @@
   "dependencies": {
     "dotenv": "^16.4.5",
     "jsdom": "^25.0.1",
-    "node-telegram-bot-api": "^0.66.0",
     "openai": "^4.58.1",
-    "pino": "^9.5.0"
+    "pino": "^9.5.0",
+    "telegraf": "^4.16.3"
   }
 }

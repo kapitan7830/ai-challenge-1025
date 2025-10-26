@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import TelegramBot from 'node-telegram-bot-api';
+import { Telegraf } from 'telegraf';
 import pino from 'pino';
 import { WebParser } from './utils/webParser.js';
 import { AnimalDetectorAgent } from './agents/animalDetectorAgent.js';
@@ -14,7 +14,7 @@ const logger = pino({
 });
 
 // Инициализация бота
-const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: true });
+const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
 
 // Хранение состояний пользователей
 const userStates = new Map();
@@ -40,24 +40,24 @@ function getUserState(chatId) {
 }
 
 // Отправка сообщения с обработкой ошибок
-async function safeSendMessage(chatId, text, options = {}) {
+async function safeSendMessage(ctx, text, options = {}) {
   try {
-    await bot.sendMessage(chatId, text, options);
+    await ctx.reply(text, options);
   } catch (error) {
-    logger.error({ error: error.message, chatId }, 'Failed to send message');
+    logger.error({ error: error.message, chatId: ctx.chat.id }, 'Failed to send message');
   }
 }
 
 // Команда /start
-bot.onText(/^\/start$/, async (msg) => {
-  const chatId = msg.chat.id;
-  logger.info({ chatId, username: msg.from.username }, 'User started bot');
+bot.command('start', async (ctx) => {
+  const chatId = ctx.chat.id;
+  logger.info({ chatId, username: ctx.from.username }, 'User started bot');
   
   const userState = getUserState(chatId);
   userState.state = STATE.IDLE;
   
   await safeSendMessage(
-    chatId,
+    ctx,
     '👋 Привет! Я бот для анализа информации о животных.\n\n' +
     'Выберите команду:\n' +
     '/article - Анализ животных из статьи по ссылке\n' +
@@ -67,8 +67,8 @@ bot.onText(/^\/start$/, async (msg) => {
 });
 
 // Команда /reset
-bot.onText(/^\/reset$/, async (msg) => {
-  const chatId = msg.chat.id;
+bot.command('reset', async (ctx) => {
+  const chatId = ctx.chat.id;
   logger.info({ chatId }, 'User reset state');
   
   const userState = getUserState(chatId);
@@ -77,7 +77,7 @@ bot.onText(/^\/reset$/, async (msg) => {
   userState.processedAnimals = [];
   
   await safeSendMessage(
-    chatId,
+    ctx,
     '🔄 Состояние сброшено.\n\n' +
     'Выберите команду:\n' +
     '/article - Анализ животных из статьи по ссылке\n' +
@@ -86,8 +86,8 @@ bot.onText(/^\/reset$/, async (msg) => {
 });
 
 // Команда /article
-bot.onText(/^\/article$/, async (msg) => {
-  const chatId = msg.chat.id;
+bot.command('article', async (ctx) => {
+  const chatId = ctx.chat.id;
   logger.info({ chatId }, 'User selected article command');
   
   const userState = getUserState(chatId);
@@ -95,12 +95,12 @@ bot.onText(/^\/article$/, async (msg) => {
   userState.animals = [];
   userState.processedAnimals = [];
   
-  await safeSendMessage(chatId, '📎 Отправьте ссылку на статью для анализа:');
+  await safeSendMessage(ctx, '📎 Отправьте ссылку на статью для анализа:');
 });
 
 // Команда /animal
-bot.onText(/^\/animal$/, async (msg) => {
-  const chatId = msg.chat.id;
+bot.command('animal', async (ctx) => {
+  const chatId = ctx.chat.id;
   logger.info({ chatId }, 'User selected animal command');
   
   const userState = getUserState(chatId);
@@ -108,13 +108,13 @@ bot.onText(/^\/animal$/, async (msg) => {
   userState.animals = [];
   userState.processedAnimals = [];
   
-  await safeSendMessage(chatId, '🦁 Введите название животного:');
+  await safeSendMessage(ctx, '🦁 Введите название животного:');
 });
 
 // Обработка текстовых сообщений
-bot.on('message', async (msg) => {
-  const chatId = msg.chat.id;
-  const text = msg.text;
+bot.on('text', async (ctx) => {
+  const chatId = ctx.chat.id;
+  const text = ctx.message.text;
   
   // Игнорируем команды
   if (text && text.startsWith('/')) {
@@ -126,31 +126,32 @@ bot.on('message', async (msg) => {
   try {
     // Обработка URL для статьи
     if (userState.state === STATE.WAITING_FOR_URL) {
-      await handleArticleUrl(chatId, text, userState);
+      await handleArticleUrl(ctx, text, userState);
     }
     // Выбор животного из списка (статья)
     else if (userState.state === STATE.SELECTING_ANIMAL_FROM_ARTICLE) {
-      await handleAnimalSelection(chatId, text, userState);
+      await handleAnimalSelection(ctx, text, userState);
     }
     // Ввод названия животного
     else if (userState.state === STATE.WAITING_FOR_ANIMAL_NAME) {
-      await handleAnimalName(chatId, text, userState);
+      await handleAnimalName(ctx, text, userState);
     }
     
   } catch (error) {
     logger.error({ error: error.message, stack: error.stack, chatId }, 'Error processing message');
     await safeSendMessage(
-      chatId,
+      ctx,
       '❌ Возникла ошибка, попробуйте позже.'
     );
   }
 });
 
 // Обработка URL статьи
-async function handleArticleUrl(chatId, url, userState) {
+async function handleArticleUrl(ctx, url, userState) {
+  const chatId = ctx.chat.id;
   logger.info({ chatId, url }, 'Processing article URL');
   
-  await safeSendMessage(chatId, '⏳ Загружаю страницу...');
+  await safeSendMessage(ctx, '⏳ Загружаю страницу...');
   
   try {
     // Парсим страницу
@@ -158,21 +159,21 @@ async function handleArticleUrl(chatId, url, userState) {
     const pageText = await parser.fetchText(url);
     
     if (!pageText || pageText.trim().length === 0) {
-      await safeSendMessage(chatId, '❌ Не удалось извлечь текст со страницы\n\n📎 Отправьте другую ссылку на статью для анализа:');
+      await safeSendMessage(ctx, '❌ Не удалось извлечь текст со страницы\n\n📎 Отправьте другую ссылку на статью для анализа:');
       userState.state = STATE.WAITING_FOR_URL;
       return;
     }
     
-    await safeSendMessage(chatId, `✅ Текст получен: ${pageText.length} символов`);
+    await safeSendMessage(ctx, `✅ Текст получен: ${pageText.length} символов`);
     
     // Ищем животных
-    await safeSendMessage(chatId, '🔍 Анализирую текст на упоминания животных...');
+    await safeSendMessage(ctx, '🔍 Анализирую текст на упоминания животных...');
     
     const detector = new AnimalDetectorAgent();
     const animals = await detector.findAnimals(pageText);
     
     if (!animals || animals.length === 0) {
-      await safeSendMessage(chatId, '❌ Животные не найдены в тексте\n\n📎 Отправьте другую ссылку на статью для анализа:');
+      await safeSendMessage(ctx, '❌ Животные не найдены в тексте\n\n📎 Отправьте другую ссылку на статью для анализа:');
       userState.state = STATE.WAITING_FOR_URL;
       return;
     }
@@ -188,21 +189,22 @@ async function handleArticleUrl(chatId, url, userState) {
     });
     message += '\n📝 Введите номер животного для получения подробной информации:';
     
-    await safeSendMessage(chatId, message);
+    await safeSendMessage(ctx, message);
     
   } catch (error) {
     logger.error({ error: error.message, stack: error.stack, chatId }, 'Error handling article URL');
-    await safeSendMessage(chatId, '❌ Возникла ошибка при обработке статьи, попробуйте позже.\n\n📎 Отправьте другую ссылку на статью для анализа:');
+    await safeSendMessage(ctx, '❌ Возникла ошибка при обработке статьи, попробуйте позже.\n\n📎 Отправьте другую ссылку на статью для анализа:');
     userState.state = STATE.WAITING_FOR_URL;
   }
 }
 
 // Обработка выбора животного из списка
-async function handleAnimalSelection(chatId, text, userState) {
+async function handleAnimalSelection(ctx, text, userState) {
+  const chatId = ctx.chat.id;
   const selectedNumber = parseInt(text);
   
   if (isNaN(selectedNumber) || selectedNumber < 1 || selectedNumber > userState.animals.length) {
-    await safeSendMessage(chatId, '❌ Неверный номер. Введите число от 1 до ' + userState.animals.length);
+    await safeSendMessage(ctx, '❌ Неверный номер. Введите число от 1 до ' + userState.animals.length);
     return;
   }
   
@@ -210,7 +212,7 @@ async function handleAnimalSelection(chatId, text, userState) {
   logger.info({ chatId, animalName: animal.name }, 'User selected animal from article');
   
   // Получаем информацию о животном
-  await getAnimalInfo(chatId, animal, userState);
+  await getAnimalInfo(ctx, animal, userState);
   
   // Отмечаем животное как обработанное
   userState.processedAnimals.push(selectedNumber - 1);
@@ -227,10 +229,10 @@ async function handleAnimalSelection(chatId, text, userState) {
     });
     message += '\n📝 Введите номер для получения информации или /reset для возврата в меню:';
     
-    await safeSendMessage(chatId, message);
+    await safeSendMessage(ctx, message);
   } else {
     await safeSendMessage(
-      chatId,
+      ctx,
       '✅ Все животные обработаны!\n\nИспользуйте /reset для возврата в меню.'
     );
     userState.state = STATE.IDLE;
@@ -238,12 +240,13 @@ async function handleAnimalSelection(chatId, text, userState) {
 }
 
 // Обработка названия животного (команда /animal)
-async function handleAnimalName(chatId, animalName, userState) {
+async function handleAnimalName(ctx, animalName, userState) {
+  const chatId = ctx.chat.id;
   logger.info({ chatId, animalName }, 'User entered animal name');
   
   try {
     // Проверяем, является ли это животным
-    await safeSendMessage(chatId, '🔍 Проверяю запрос...');
+    await safeSendMessage(ctx, '🔍 Проверяю запрос...');
     
     const detector = new AnimalDetectorAgent();
     const isAnimal = await detector.validateAnimalName(animalName);
@@ -251,7 +254,7 @@ async function handleAnimalName(chatId, animalName, userState) {
     if (!isAnimal) {
       logger.info({ chatId, animalName }, 'Invalid animal name entered');
       await safeSendMessage(
-        chatId,
+        ctx,
         '❌ Запрос не является названием животного.\n\n' +
         'Пожалуйста, введите корректное название животного (например: "слон", "кошка", "велоцираптор") или /reset для возврата в меню.'
       );
@@ -263,25 +266,26 @@ async function handleAnimalName(chatId, animalName, userState) {
       context: 'Запрос пользователя'
     };
     
-    await getAnimalInfo(chatId, animal, userState);
+    await getAnimalInfo(ctx, animal, userState);
     
     // Предлагаем ввести еще животное
     await safeSendMessage(
-      chatId,
+      ctx,
       '\n🦁 Введите название другого животного или /reset для возврата в меню:'
     );
     
   } catch (error) {
     logger.error({ error: error.message, stack: error.stack, chatId, animalName }, 'Error validating animal name');
-    await safeSendMessage(chatId, '❌ Возникла ошибка при проверке запроса, попробуйте позже.\n\n🦁 Введите название животного или /reset для возврата в меню:');
+    await safeSendMessage(ctx, '❌ Возникла ошибка при проверке запроса, попробуйте позже.\n\n🦁 Введите название животного или /reset для возврата в меню:');
     userState.state = STATE.WAITING_FOR_ANIMAL_NAME;
   }
 }
 
 // Получение информации о животном через Perplexity и агента-зоолога
-async function getAnimalInfo(chatId, animal, userState) {
+async function getAnimalInfo(ctx, animal, userState) {
+  const chatId = ctx.chat.id;
   try {
-    await safeSendMessage(chatId, `🔍 Ищу информацию о: ${animal.name}...`);
+    await safeSendMessage(ctx, `🔍 Ищу информацию о: ${animal.name}...`);
     
     // Поиск через Perplexity
     const perplexity = new PerplexitySearch();
@@ -300,10 +304,10 @@ async function getAnimalInfo(chatId, animal, userState) {
       hasResults: !!(searchResults && searchResults.results)
     }, 'Perplexity search completed');
     
-    await safeSendMessage(chatId, '✅ Информация из источников получена');
+    await safeSendMessage(ctx, '✅ Информация из источников получена');
     
     // Анализ через агента-зоолога
-    await safeSendMessage(chatId, '🔬 Анализирую информацию...');
+    await safeSendMessage(ctx, '🔬 Анализирую информацию...');
     
     const animalWithInfo = {
       ...animal,
@@ -325,33 +329,33 @@ async function getAnimalInfo(chatId, animal, userState) {
       message += `🌍 *Ареал обитания:*\n${report.habitat || 'Информации нет'}`;
     }
     
-    await safeSendMessage(chatId, message, { parse_mode: 'Markdown' });
+    await safeSendMessage(ctx, message, { parse_mode: 'Markdown' });
     
     logger.info({ chatId, animalName: animal.name }, 'Successfully processed animal info');
     
   } catch (error) {
     logger.error({ error: error.message, stack: error.stack, chatId, animalName: animal.name }, 'Error getting animal info');
-    await safeSendMessage(chatId, '❌ Возникла ошибка при получении информации, попробуйте позже.');
+    await safeSendMessage(ctx, '❌ Возникла ошибка при получении информации, попробуйте позже.');
   }
 }
 
-// Обработка ошибок polling
-bot.on('polling_error', (error) => {
-  logger.error({ error: error.message, code: error.code }, 'Polling error');
+// Обработка ошибок
+bot.catch((err, ctx) => {
+  logger.error({ error: err.message, stack: err.stack, chatId: ctx.chat?.id }, 'Bot error');
 });
 
 // Graceful shutdown
-process.on('SIGINT', () => {
+process.once('SIGINT', () => {
   logger.info('Bot stopping...');
-  bot.stopPolling();
-  process.exit(0);
+  bot.stop('SIGINT');
 });
 
-process.on('SIGTERM', () => {
+process.once('SIGTERM', () => {
   logger.info('Bot stopping...');
-  bot.stopPolling();
-  process.exit(0);
+  bot.stop('SIGTERM');
 });
 
+// Запуск бота
+bot.launch();
 logger.info('Bot started successfully');
 
