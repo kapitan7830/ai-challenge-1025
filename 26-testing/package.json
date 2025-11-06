@@ -1,0 +1,29 @@
+{
+  "name": "test-generator",
+  "version": "1.0.0",
+  "description": "CLI для автоматической генерации и запуска юнит-тестов",
+  "main": "cli.js",
+  "type": "module",
+  "scripts": {
+    "test": "node cli.js"
+  },
+  "keywords": [
+    "testing",
+    "jest",
+    "openai",
+    "unit-tests"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "dotenv": "^16.4.5",
+    "openai": "^4.58.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.23.0",
+    "@babel/preset-env": "^7.23.0",
+    "babel-jest": "^29.7.0",
+    "jest": "^29.7.0"
+  }
+}
