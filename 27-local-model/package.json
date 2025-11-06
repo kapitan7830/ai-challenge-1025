@@ -1,0 +1,20 @@
+{
+  "name": "telegram-openai-bot",
+  "version": "1.0.0",
+  "description": "Telegram bot that forwards messages to OpenAI",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "keywords": ["telegram", "bot", "openai", "chatgpt"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "telegraf": "^4.16.3",
+    "openai": "^4.58.1",
+    "dotenv": "^16.4.5"
+  }
+}
+
