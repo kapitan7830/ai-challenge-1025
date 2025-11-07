@@ -1,0 +1,19 @@
+{
+  "name": "telegram-do-everything-bot",
+  "version": "1.0.0",
+  "description": "Телеграм-бот, который делает ВСЁ за 5 секунд с прогресс-баром",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "keywords": ["telegram", "bot", "productivity", "magic"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "telegraf": "^4.16.3",
+    "dotenv": "^16.4.5"
+  }
+}
+
